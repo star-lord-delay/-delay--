@@ -1,2 +1,65 @@
-<h1>テスト</h1>
-<h2>これはテストページです</h2>
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        <title>安心通学ナビ</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+
+<!--ヘッダー-->
+        <header class="header">
+            <div class="header__content">
+                <div class="header__title-group">
+                    <h1 class="header__title">安心通学</h1>
+                    <div class="header__tag" id="header-Tag">delay-0</div>
+                </div>
+            </div>
+        </header>
+
+<!--メインコンテンツ-->
+        <main class="main__content">
+
+<!--プラン-->
+            <div class="plan">
+                <div class="plan__header">
+                    <p class="plan__title">あなたの通学プラン</p>
+                    <span class="plan__station">取得中</span>
+                </div>
+<!--遅延時-->
+                <div class="plan__alert" id="alertBanner" style="display: none;">
+                    <span class="plan__alert-text" id="alert-Text">遅延情報を計算中</span>
+                </div>
+
+<!--推奨プラン-->
+                <div class ="plan__recommended">
+<!--電車の情報-->
+                    <div class="plan__recommend-left">
+                        <div class="plan__recommend-label" id="recStatusLabel">計算中...</div>
+                        <div class="plan__recommend-time" id="recTrainTime">--:--</div>
+                        <div class="plan__recommend-station" id="recStationName">取得中...</div>
+                    </div>
+<!--スクーバス時刻-->
+                    <div class="plan__recommend-right">
+                        <div class="plan__recommend-label">利用するバス</div>
+                        <div class="plan__recommend-bustime" id="recBusTime">--:--発</div>
+                    </div>
+                </div>
+            </div>
+<!--候補-->
+            <div class="plan__candidate">
+                <div class="candidate__header">
+                    <h3 class="candidate__title">どの電車なら間に合う</h3>
+                    <p class="candidate__station">利用駅:<span id="candidateStation">取得中</span></p>
+                </div>
+<!-- JSが計算結果（時刻表のリスト）を流し込む空箱 -->
+                <div class="candidate__list" id="candidateList">
+                    <p class="candidate__loading">最新のダイヤと遅延情報を計算中...</p>
+                </div>
+            </div>
+        </main>
+<!--JavaScriptを読み込む-->
+        <script src="app.js"></script>
+    </body>
+</html>
