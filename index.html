@@ -25,7 +25,7 @@
             <div class="plan">
                 <div class="plan__header">
                     <p class="plan__title">あなたの通学プラン</p>
-                    <span class="plan__station">取得中</span>
+                    <span class="plan__station" id="userStationName">取得中</span>
                 </div>
 <!--遅延時-->
                 <div class="plan__alert" id="alertBanner" style="display: none;">
@@ -33,7 +33,7 @@
                 </div>
 
 <!--推奨プラン-->
-                <div class ="plan__recommended">
+                <div class ="plan__recommend">
 <!--電車の情報-->
                     <div class="plan__recommend-left">
                         <div class="plan__recommend-label" id="recStatusLabel">計算中...</div>
@@ -48,7 +48,7 @@
                 </div>
             </div>
 <!--候補-->
-            <div class="plan__candidate">
+            <div class="candidate">
                 <div class="candidate__header">
                     <h3 class="candidate__title">どの電車なら間に合う</h3>
                     <p class="candidate__station">利用駅:<span id="candidateStation">取得中</span></p>
