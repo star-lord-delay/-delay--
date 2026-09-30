@@ -1,0 +1,118 @@
+/* 設定 */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    background-color: #f8f8ff;
+    color: #000000;
+}
+
+/* ヘッダー */
+.header{
+    background-color:#4169e1;
+    color:white;
+    padding: 16px 20px 40px;
+}
+
+.header__content{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.header__title-group{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+}
+
+.header__title{
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.header__tag{
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* メインコンテンツ */
+.main{
+    padding: 0 16px 24px;
+    margin-top: -24px;
+}
+
+/* カードスタイル */
+.plan,candidate{
+    background-color: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 16px;
+}
+
+/* プラン */
+.plan__header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom: 16px;
+}
+
+.plan__title{
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    line-height: 1.5;
+}
+
+.plan__station{
+    font-size: 14px;
+    color:#4169e1;
+    font-weight: bold;
+}
+
+/* 遅延時 */
+.plan__alert{
+    background-color: #fef2f2;
+    color:#dc2626;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+/* 推奨プラン */
+.plan__recommend{
+    border: 2px solid #10b981;
+    border-radius: 12px;
+    padding: 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.plan__recommend-left{
+    flex:1;
+}
+
+.plan__recommend-right{
+    text-align:right;
+    padding-left: 16px;
+}
+
+.plan__recommend-label{
+    font-size:12px;
+    color: #10b981;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.plan__recommend-right.plan__recommend-label{
+    color:#666;
+}
