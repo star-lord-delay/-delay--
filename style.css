@@ -19,12 +19,12 @@ body{
 .header{
     background-color:#4169e1;
     color:white;
-    padding: 16px 20px 40px;
+    padding: 20px 16px;
 }
 
 .header__content{
     display:flex;
-    justify-content:space-between;
+    justify-content:center;
     align-items:center;
 }
 
@@ -35,19 +35,21 @@ body{
 }
 
 .header__title{
-    font-size: 18px;
+    font-size: 22px;
     font-weight: bold;
+    margin: 0;
 }
 
 .header__tag{
-    font-size: 18px;
+    font-size: 22px;
     font-weight: bold;
 }
 
 /* メインコンテンツ */
-.main{
+.main__content{
     padding: 0 16px 24px;
-    margin-top: -24px;
+    position: relative;
+    z-index: 10;
 }
 
 /* カードスタイル */
@@ -57,6 +59,38 @@ body{
     padding: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     margin-bottom: 16px;
+}
+
+/* 利用駅登録 */
+.station{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 16px 20px;
+}
+
+.station__setting{
+    font-size: 14px;
+    color: #666;
+    font-weight: bold;
+}
+
+.station__wrapper{
+    position: relative;
+}
+
+.station__select{
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: #f0f4f8;
+    border: none;
+    padding: 8px 32px 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #333;
+    font-weight: bold;
+    outline: none;
 }
 
 /* プラン */
@@ -69,9 +103,9 @@ body{
 
 .plan__title{
     font-size: 14px;
-    font-weight: bold;
     color: #666;
     line-height: 1.5;
+    margin: 0;
 }
 
 .plan__station{
@@ -89,6 +123,11 @@ body{
     font-size: 13px;
     font-weight: bold;
     margin-bottom: 16px;
+}
+
+/* 遅延時に赤文字変更 */
+.text-red{
+    color:#dc2626 !important;
 }
 
 /* 推奨プラン */
@@ -119,4 +158,99 @@ body{
 
 .plan__recommend-right.plan__recommend-label{
     color:#666;
+}
+
+.plan__recommend-time,
+.plan__recommend-bustime {
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.plan__recommend-station{
+    font-size: 12px;
+    color:#666;
+    margin-top: 4px;
+}
+
+/* 候補 */
+.candidate__header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom: 16px;
+}
+
+.candidate___title{
+    font-size: 14px;
+    color: #333;
+    margin: 0;
+}
+
+.candidate__station{
+    font-size: 12px;
+    color:#666;
+    font-weight: bold;
+}
+
+.candidate__loading{
+    font-size: 19px;
+    color: #999;
+    text-align: center;
+    padding: 20px 0;
+}
+
+/* ナビゲーション */
+.bottom__nav{
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background-color: #fff;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 60px;
+    z-index: 100;
+}
+
+.nav__item{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #9ca3af;
+    font-size: 10px;
+    font-weight: bold;
+    gap: 4px;
+    flex: 1;
+    position: relative;
+}
+
+.nav__item.active{
+    color: #4169e1;
+}
+
+.nav__item svg{
+    width: 24px;
+    height: 24px;
+}
+
+.nav__badge{
+    display: none;
+    position: absolute;
+    top: -2px;
+    right: 50px;
+    margin-right: -16px;
+    background-color: #ef4444;
+    color: #fff;
+    font-size: 10px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    justify-content: center;
+    align-items: center;
 }
