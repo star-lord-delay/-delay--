@@ -19,7 +19,14 @@ POST /api/users/:userId/stations
 GET  /api/users/:userId/commuter-passes
 GET  /api/notifications?userId=:userId
 POST /api/notifications/:notificationId/read
+GET  /api/user/station
+POST /api/user/station
+GET  /api/train-status
+POST /api/bus-schedule
 ```
+
+初回は MySQL で `database/schema.sql` を実行してテーブルとテストデータを作成してください。
+`TRAIN_STATUS_API_URL` には利用する鉄道運行情報APIのURLを設定します。
 
 起動方法:
 
