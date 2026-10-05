@@ -12,7 +12,7 @@ const Otp = {
   async verify(email, otpCode, usageType) {
     const [rows] = await pool.query(
       `SELECT * FROM otp_tbl WHERE email = ? AND otp_code = ? AND usage_type = ?
-       AND is_used = 0 AND expiry_at > NOW() ORDER BY created_at DESC LIMIT 1`,
+AND is_used = 0 AND expiry_at > NOW() ORDER BY created_at DESC LIMIT 1`,
       [email, otpCode, usageType]
     );
     return rows[0];
