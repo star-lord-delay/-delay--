@@ -1,3 +1,4 @@
+// ログイン、OTP認証
 const Otp = require('../models/Otp');
 
 exports.requestOtp = async (req, res) => {

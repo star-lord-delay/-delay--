@@ -1,3 +1,4 @@
+//  station_tbl
 const pool = require('../config/database');
 
 const Station = {

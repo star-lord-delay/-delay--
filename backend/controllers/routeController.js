@@ -1,3 +1,4 @@
+// 電車＋バス統合経路検索
 const searchEngine = require('../services/searchEngine');
 
 exports.findIntegratedRoute = async (req, res) => {

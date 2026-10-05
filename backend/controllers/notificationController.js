@@ -1,3 +1,4 @@
+// 通知一覧・既読処理
 const NotificationStatus = require('../models/NotificationStatus');
 
 exports.getNotifications = async (req, res) => {

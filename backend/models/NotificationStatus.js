@@ -1,3 +1,4 @@
+//  notification_statuses_tbl
 const pool = require('../config/database');
 
 const NotificationStatus = {

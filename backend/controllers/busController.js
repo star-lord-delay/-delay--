@@ -1,3 +1,4 @@
+// バス運行情報API
 const BusSchedule = require('../models/BusSchedule');
 
 exports.getBusSchedules = async (req, res) => {

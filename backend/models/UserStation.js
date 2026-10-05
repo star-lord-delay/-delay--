@@ -1,3 +1,4 @@
+// user_stations_tbl
 const pool = require('../config/database');
 
 const UserStation = {

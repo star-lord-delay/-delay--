@@ -1,3 +1,4 @@
+//  bus_tbl　バステーブル
 const pool = require('../config/database');
 
 const BusSchedule = {

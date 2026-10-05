@@ -1,3 +1,4 @@
+// commuter_pass_tbl
 const pool = require('../config/database');
 
 module.exports = {

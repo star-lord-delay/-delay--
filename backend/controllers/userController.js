@@ -1,3 +1,4 @@
+// 利用駅設定、定期券管理
 const User = require('../models/User');
 const UserStation = require('../models/UserStation');
 const CommuterPass = require('../models/CommuterPass');
