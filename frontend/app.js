@@ -16,4 +16,7 @@ const stationData = {
 
 document.addEventListener('DOMContentLoaded', async () => {
     const selectBox = document.getElementById('station-select');
+    for (const line in stationData) {
+        
+    }
 }
