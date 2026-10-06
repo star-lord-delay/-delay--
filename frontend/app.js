@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 const stationData = {
     "常磐線（取手・土浦方面）": [
         "取手", "藤代", "龍ヶ崎", "牛久", "ひたち野うしく", "荒川沖", "土浦", "神立", "高浜", "石岡", "羽鳥", "友部", "内原", "赤塚"

@@ -23,17 +23,24 @@ const Dashboard = {
 
   async findNextBus(station, weekday, delaySeconds) {
     const [rows] = await pool.query(
-      `SELECT bus_id, station_name AS station, weekday, train_arrival_time,
-              bus_departure_time
-       FROM bus_schedule_tbl
-       WHERE station_name = ? AND weekday = ?
-         AND TIME_TO_SEC(bus_departure_time) >=
-             TIME_TO_SEC(train_arrival_time) + ?
-       ORDER BY bus_departure_time ASC
+      `SELECT bus_survice, bus_time AS bus_departure_time
+       FROM bus_tbl
+       WHERE TIME_TO_SEC(bus_time) >= TIME_TO_SEC(CURTIME()) + ?
+       ORDER BY bus_time ASC
        LIMIT 1`,
-      [station, weekday, delaySeconds]
+      [delaySeconds]
     );
-    return rows[0] || null;
+    if (!rows[0]) {
+      const [firstBus] = await pool.query(
+        `SELECT bus_survice, bus_time AS bus_departure_time
+         FROM bus_tbl
+         ORDER BY bus_time ASC
+         LIMIT 1`
+      );
+      return firstBus[0] || null;
+    }
+
+    return rows[0];
   }
 };
 

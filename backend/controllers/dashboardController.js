@@ -27,7 +27,8 @@ exports.saveStation = async (req, res, next) => {
 
 exports.getBusSchedule = async (req, res, next) => {
   try {
-    const { station, delayMinutes = 0 } = req.body;
+    const station = req.query.station || req.body.station;
+    const delayMinutes = req.query.delayMinutes !== undefined ? req.query.delayMinutes : (req.body.delayMinutes || 0);
     const delay = Number(delayMinutes);
     if (typeof station !== 'string' || station.trim() === '' || !Number.isFinite(delay) || delay < 0) {
       return res.status(400).json({
