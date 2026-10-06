@@ -1,11 +1,18 @@
 const Dashboard = require('../models/Dashboard');
 
-const userId = () => Number(process.env.DEMO_USER_ID || 1);
+const getUserId = () => Number(process.env.DEMO_USER_ID || 1);
 
 exports.getStation = async (req, res, next) => {
   try {
-    const station = await Dashboard.getStation(userId());
-    res.json({ success: true, station });
+    const userId = getUserId(req);
+    const stationData = await Dashboard.getStation(userId);
+    const name = (stationData && stationData.station_name) ? stationData.station_name : '土浦';
+    res.json({ 
+      success: true, 
+      stationName: name,
+      station_name: name,
+      station: name
+    });
   } catch (error) {
     next(error);
   }
@@ -27,8 +34,7 @@ exports.saveStation = async (req, res, next) => {
 
 exports.getBusSchedule = async (req, res, next) => {
   try {
-    const station = req.query.station || req.body.station;
-    const delayMinutes = req.query.delayMinutes !== undefined ? req.query.delayMinutes : (req.body.delayMinutes || 0);
+    const { station, delayMinutes = 0 } = req.body;
     const delay = Number(delayMinutes);
     if (typeof station !== 'string' || station.trim() === '' || !Number.isFinite(delay) || delay < 0) {
       return res.status(400).json({

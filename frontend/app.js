@@ -54,7 +54,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const res = await fetch(`${API_BASE_URL}/user/station`);
         if (res.ok) {
             const data = await res.json();
-            userStation = data.stationName;
+            let raw = data.stationName || data.station_name || data.station || "土浦";
+            if (typeof raw === 'object' && raw !== null) {
+                raw = raw.station_name || raw.station || "土浦";
+            }
+            userStation = typeof raw === 'string' ? raw : "土浦";
             tempSelectedStation = userStation;
         }
     } catch (error) {
@@ -96,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ stationName: userStation })
+                body: JSON.stringify({ station: userStation, stationName: userStation })
             });
         } catch (error) {
             console.error("サーバーへの登録に失敗しました", error);
@@ -119,13 +123,13 @@ async function updateApp(stationName) {
 
     try {
         // 遅延情報取得//
-        const trainRes = await fetch(`${API_BASE_URL}/train-status?station=${stationName}`);
-        if (trainRes.ok) throw new Error("遅延情報の取得に失敗しました");
+        const trainRes = await fetch(`${API_BASE_URL}/train-status?station=${encodeURIComponent(stationName)}`);
+        if (!trainRes.ok) throw new Error("遅延情報の取得に失敗しました");
         const trainData = await trainRes.json();
 
         //DBからバス時刻取得//
-        const busRes = await fetch(`${API_BASE_URL}/bus-schedule?station=${stationName}&delay=${trainData.delayMinutes}`);
-        if (busRes.ok) throw new Error("バス時刻の取得に失敗しました");
+        const busRes = await fetch(`${API_BASE_URL}/bus-schedule?station=${encodeURIComponent(stationName)}&delay=${trainData.delayMinutes || 0}`);
+        if (!busRes.ok) throw new Error("バス時刻の取得に失敗しました");
         const busData = await busRes.json();
         // データを表示
         renderUI(stationName, trainData, busData);
@@ -146,7 +150,6 @@ function renderUI(stationName, trainData, busData) {
     } else {
         alertBanner.style.display = 'none';
         headerTag.textContent = "delay-0";
-        document.getElementById('recStatusLabel').textContent = "平常運転の推奨プラン";
     }
     //時刻の反映//
     document.getElementById('recTrainTime').textContent = busData.recommendTrain;
