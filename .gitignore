@@ -1,0 +1,37 @@
+# =========================
+# 1. 機密情報・環境変数（最重要）
+# =========================
+.env
+backend/.env
+*.pem
+*.key
+credentials.json
+
+# =========================
+# 2. Node.js (バックエンド/フロントエンド共通)
+# =========================
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+
+# =========================
+# 3. Python (バックエンド)
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env_python/
+
+# =========================
+# 4. OS・エディタ関連
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
