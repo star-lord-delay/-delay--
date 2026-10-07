@@ -30,15 +30,19 @@ const Dashboard = {
       stationId = (maxRes[0].maxId || 0) + 1;
 
     await pool.query(
-      'DELETE FROM user_stations_tbl WHERE user_id = ?',
-      [userId]
-    );
+        'INSERT INTO station_tbl (station_id, station_name) VALUES (?, ?)',
+        [stationId, station]
+      );
+    } else {
+      stationId = stations[0].station_id;
+    }
 
     await pool.query(
       'INSERT INTO user_stations_tbl (user_id, station_id) VALUES (?, ?)',
       [userId, stationId]
     );
   },
+
 
   async findNextBus(station, weekday, delaySeconds) {
     const [rows] = await pool.query(

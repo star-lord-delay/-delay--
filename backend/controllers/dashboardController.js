@@ -46,40 +46,50 @@ exports.getBusSchedule = async (req, res, next) => {
     }
 
     const now = new Date();
-    const weekday = [0, 6].includes(now.getDay()) ? 'holiday' : 'weekday';
+    const isHoliday = [0, 6].includes(now.getDay());
+    const weekday = isHoliday ? 'holiday' : 'weekday';
+
+    //バス時刻//
     const schedule = await Dashboard.findNextBus(station.trim(), weekday, delay * 60);
     const rawTime = schedule ? (schedule.bus_departure_time || schedule.bus_time || schedule.adjusted_arrival_time) : "08:30:00";
     const formattedBusTime = String(rawTime).slice(0, 5);
     
+    //利用駅の時刻表//
     let trainTime = "--:--";
-    let arrivalTime = "--:--";
+    let arriveTime = "計算中";
 
-    const timeEndpoint = process.env.TRAIN_JOBAN_TIME_API_URL;
-    const apikey = process.env.TRAIN_STATUS_API_KEY;
+    //日本語の駅名をローマ字返還//
+    const stationMap = {
+      "取手": "Toride", "藤代": "Fujishiro", "龍ヶ崎": "Ryugasakishi", "牛久": "Ushiku",
+      "ひたち野うしく": "Hitachinoushiku", "荒川沖": "Arakawaoki", "土浦": "Tsuchiura",
+      "神立": "Kandatsu", "高浜": "Takahama", "石岡": "Ishioka", "羽鳥": "Hatori",
+      "友部": "Tomobe", "内原": "Uchihara", "赤塚": "Akatsuka"
+    }
 
-    if (timeEndpoint) {
+    const timeEndpoint = process.env.TRAIN__JOBAN_TIME_API_URL;
+    const apiKey = process.env.TRAIN__JOBAN_TIME_API_KEY;
+    const romajiStation = stationMap[station.trim()];
+
+    if (timeEndpoint && apiKey && romajiStation) {
       try {
-        const targetUrl = `${timeEndpoint}?station=${encodeURIComponent(station)}`;
-        const timeRes = await fetch(targetUrl, {
-          headers: apikey ? { Authorization: `Bearer ${apikey}` } : {}
-        });
+        const trainCalendar = isHoliday ? 'odpt.Calendar:SaturdayHoliday' : 'odpt.Calendar:Weekday';
+        const targetUrl = `${timeEndpoint}?odpt:railway=odpt.Railway:JR-East.Joban&odpt:station=odpt.Station:JR-East.Joban.${romajiStation}&odpt:railDirection=odpt.RailDirection:Outbound&odpt:calendar=${trainCalendar}&acl:consumerKey=${apiKey}`;
+        const timeRes = await fetch(targetUrl);
         if (timeRes.ok) {
           const timeData = await timeRes.json();
-          if (timeData.departure_time) {
-            trainTime = timeData.departure_time;
-          } else if (timeData[0] && timeData[0].departure_time) {
-            trainTime = timeData[0].departure_time;
+          if (timeData.length > 0) {
+            const timetable = timeData[0]["odpt:stationTimetableObject"];
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const currentTimeStr = `${hours}:${minutes}`;
+            const nextTrain = timetable.find(t => t["odpt:departureTime"] >= currentTimeStr);
+            if (nextTrain) {
+              trainTime = nextTrain["odpt:departureTime"];
+            }
           }
-          if (timeData.arrivalTime) {
-            arrivalTime = timeData.arrivalTime;
-          } else if (timeData[0] && timeData[0].arrivalTime) {
-            arrivalTime = timeData[0].arrivalTime;
-          }
-        } else {
-          console.error("時刻表APIからエラーが返されました。", timeRes.status);
         }
       } catch (error) {
-        console.error("時刻表APIの取得に失敗しました", error);
+        console.error("運行情報APIの取得に失敗しました", error);
       }
     }
 
@@ -90,7 +100,7 @@ exports.getBusSchedule = async (req, res, next) => {
       candidates: [
         {
           trainTime: trainTime,
-          arrivalTime: arrivalTime,
+          arriveTime: arriveTime,
           busTime: formattedBusTime
         }
       ]
