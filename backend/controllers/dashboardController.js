@@ -63,8 +63,11 @@ exports.getBusSchedule = async (req, res, next) => {
       "取手": "Toride", "藤代": "Fujishiro", "龍ヶ崎": "Ryugasakishi", "牛久": "Ushiku",
       "ひたち野うしく": "Hitachinoushiku", "荒川沖": "Arakawaoki", "土浦": "Tsuchiura",
       "神立": "Kandatsu", "高浜": "Takahama", "石岡": "Ishioka", "羽鳥": "Hatori",
-      "友部": "Tomobe", "内原": "Uchihara", "赤塚": "Akatsuka"
-    }
+      "友部": "Tomobe", "内原": "Uchihara", "赤塚": "Akatsuka",
+      "勝田": "Katsuta", "佐和": "Sawa", "東海": "Tokai", "大甕": "Omika",
+      "常陸多賀": "Hitachitaga", "日立": "Hitachi", "小木津": "Ogitsu", "十王": "Juo",
+      "高萩": "Takahagi", "南中郷": "Minaminakago", "磯原": "Isohara", "大津港": "Otsuko"
+    };
 
     const timeEndpoint = process.env.TRAIN__JOBAN_TIME_API_URL;
     const apiKey = process.env.TRAIN__JOBAN_TIME_API_KEY;
