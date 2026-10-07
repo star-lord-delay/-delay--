@@ -22,12 +22,12 @@ const Dashboard = {
       'SELECT station_id FROM station_tbl WHERE station_name = ?',
       [station]
     );
+
+    let stationId;
+
     if (!stations[0]) {
-      const error = new Error('指定された駅が存在しません。');
-      error.statusCode = 404;
-      throw error;
-    }
-    const stationId = stations[0].station_id;
+      const [maxRes] = await pool.query('SELECT MAX(station_id) as maxId FROM station_tbl');
+      stationId = (maxRes[0].maxId || 0) + 1;
 
     await pool.query(
       'DELETE FROM user_stations_tbl WHERE user_id = ?',

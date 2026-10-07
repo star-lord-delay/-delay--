@@ -141,7 +141,7 @@ async function updateApp(stationName) {
 //画面描画//
 function renderUI(stationName, trainData, busData) {
     const alertBanner = document.getElementById('alertBanner');
-    const headerTag = document.getElementById('headerTag');
+    const headerTag = document.getElementById('header-Tag');
 
     //遅延バナー//
     if (trainData.delayMinutes > 0) {
@@ -152,9 +152,11 @@ function renderUI(stationName, trainData, busData) {
         headerTag.textContent = "delay-0";
     }
     //時刻の反映//
-    document.getElementById('recTrainTime').textContent = busData.recommendTrain;
-    document.getElementById('resBusTime').textContent = `${busData.recommendBus}発`;
+    const trainTimeEl = document.getElementById('recTrainTime');
+    if (trainTimeEl) trainTimeEl.textContent = busData.recommendTrain || "--:--";
 
+    const busTimeEl = document.getElementById('recBusTime');
+    if (busTimeEl) busTimeEl.textContent = busData.recommendBus ? `${busData.recommendBus}発` : "--:--発";
     //候補リスト//
     const candidateList = document.getElementById('candidateList');
     if (candidateList) {
