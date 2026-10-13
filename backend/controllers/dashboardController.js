@@ -200,14 +200,75 @@ exports.getTrainStatus = async (req, res, next) => {
   }
 };
 
-function extractDelayMinutes(value) {
-  if (!value || typeof value !== 'object') return null;
-  for (const key of ['delayMinutes', 'delay_minutes', 'delay']) {
-    if (key in value && Number.isFinite(Number(value[key]))) return Math.max(0, Number(value[key]));
+//水郡線遅延情報//
+exports.getSuigunStatus = async (req, res, next) => {
+  const baseUrl = process.env.TRAIN__SUIGUN_TIME_API_URL;
+  const apiKey = process.env.TRAIN__SUIGUN_TIME_API_KEY;
+
+  if (!baseUrl || !apiKey) {
+    return res.json({
+      success: true,
+      delayMinutes: 0,
+      isCanceled: false,
+      infoText: "水郡線の運行情報APIが設定されていません。"
+    });
   }
-  for (const child of Object.values(value)) {
-    const result = extractDelayMinutes(child);
-    if (result !== null) return result;
+  try {
+    const targetUrl = `${baseUrl}?odpt:railway=odpt.Railway:JR-East.Suigun&acl:consumerKey=${apiKey}`;
+    const response = await fetch(targetUrl);
+
+    if (!response.ok) {
+      return res.status(502).json({
+        success: false,
+        message: '水郡線の運行情報APIがエラーを返しました。'
+      });
+    }
+    const infoData = await response.json();
+    let delayMinutes = 0;
+    let isCanceled = false;
+    let alertMessage = "";
+    let rawText = "平常運転です。";
+
+    if (infoData.length > 0 && infoData[0]["odpt:trainInformationText"]) {
+      rawText = infoData[0]["odpt:trainInformationText"].ja;
+
+      if (rawText.includes("運休") || rawText.includes("運転見合わせ")) {
+        isCanceled = true;
+        delayMinutes = 999;
+        alertMessage = "水郡線は運休中です。";
+      }
+      else{
+        const match = rawText.match(/(\d+)分遅れ/);
+        if (match) {
+          delayMinutes = parseInt(match[1], 10);
+          alertMessage = `水郡線は${delayMinutes}分遅れています。`;
+        }
+        else if (rawText !== "平常運転") {
+          delayMinutes = 999;
+          alertMessage = "水郡線のダイヤが乱れています。";
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      delayMinutes: delayMinutes,
+      isCanceled: isCanceled,
+      infoText: rawText,
+      alertMessage: alertMessage
+    });
+  } catch (error) {
+    next(error);
   }
-  return null;
-}
+};
+// function extractDelayMinutes(value) {
+//   if (!value || typeof value !== 'object') return null;
+//   for (const key of ['delayMinutes', 'delay_minutes', 'delay']) {
+//     if (key in value && Number.isFinite(Number(value[key]))) return Math.max(0, Number(value[key]));
+//   }
+//   for (const child of Object.values(value)) {
+//     const result = extractDelayMinutes(child);
+//     if (result !== null) return result;
+//   }
+//   return null;
+// }
