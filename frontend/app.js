@@ -156,11 +156,31 @@ function renderUI(stationName, trainData, busData) {
     if (trainTimeEl) trainTimeEl.textContent = busData.recommendTrain || "--:--";
 
     const busTimeEl = document.getElementById('recBusTime');
-    if (busTimeEl) busTimeEl.textContent = busData.recommendBus ? `${busData.recommendBus}発` : "--:--発";
+    if (busTimeEl) {
+        if (busData.recommendBus === "利用できるバスがありません") {
+            // エラーメッセージの場合は「発」をつけず、文字を小さくする
+            busTimeEl.textContent = busData.recommendBus;
+            busTimeEl.style.fontSize = "16px"; // スマホでもはみ出ないサイズに調整
+            busTimeEl.style.whiteSpace = "normal"; // 必要に応じて折り返す
+        } else if (busData.recommendBus) {
+            // 通常の時刻の場合は「発」をつけて大きくする
+            busTimeEl.textContent = `${busData.recommendBus}発`;
+            busTimeEl.style.fontSize = ""; // CSSの元のサイズに戻す
+        } else {
+            busTimeEl.textContent = "--:--発";
+            busTimeEl.style.fontSize = "";
+        }
+    }
     //候補リスト//
     const candidateList = document.getElementById('candidateList');
     if (candidateList) {
-        candidateList.innerHTML = busData.candidates.map(c => `
+        candidateList.innerHTML = busData.candidates.map(c => {
+            // ★ リスト用のバス時刻にも条件を追加（バスがない時は「発」をつけない）
+            const displayBusTime = (c.busTime && c.busTime.includes("バスがありません")) 
+                ? c.busTime 
+                : `${c.busTime}発`;
+
+            return `
             <div style="padding: 16px 0; border-bottom:1px solid #f0f4f8;">
                 <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">
                     <span style="color: #4169e1; margin-right: 4px;"></span>${c.trainTime}発
@@ -168,9 +188,10 @@ function renderUI(stationName, trainData, busData) {
                     </div>
                     <div style="font-size: 13px; color: #666;">
                         水戸着 ${c.arriveTime} <span style="margin: 0 8px;">→</span>
-                        <span style="color: #10b981; font-weight: bold;">${c.busTime}発</span>
+                        <span style="color: #10b981; font-weight: bold;">${displayBusTime}</span>
                     </div>
                 </div>
-        `).join('');
+            `;
+        }).join('');
     }
 }
