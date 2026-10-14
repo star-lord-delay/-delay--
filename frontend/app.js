@@ -153,10 +153,12 @@ function renderUI(stationName, trainData, busData) {
     }
     //時刻の反映//
     const trainTimeEl = document.getElementById('recTrainTime');
-    const planBox = document.getElementById('planBox');
     if (trainTimeEl) trainTimeEl.textContent = busData.recommendTrain || "--:--";
-
+    const statusLabel = document.getElementById('recStatusLabel');
+    if (statusLabel) statusLabel.textContent = "推奨プラン";
     const busTimeEl = document.getElementById('recBusTime');
+    const planBox = document.getElementById('planBox');
+
     if (busTimeEl) {
         const isMissed = busData.isLate || busData.recommendBus === "利用できるバスがありません";
         if (isMissed) {
