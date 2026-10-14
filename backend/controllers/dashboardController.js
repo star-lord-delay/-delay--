@@ -84,7 +84,9 @@ exports.getBusSchedule = async (req, res, next) => {
     const timeEndpoint = process.env.TRAIN__JOBAN_TIME_API_URL;
     const apiKey = process.env.TRAIN__JOBAN_TIME_API_KEY;
     const romajiStation = stationMap[station.trim()];
+    let candidatesList = [];
 
+    //現在時刻から電車を4本取得し、それぞれもバスを計算//
     if (timeEndpoint && apiKey && romajiStation) {
       try {
         const trainCalendar = isHoliday ? 'odpt.Calendar:SaturdayHoliday' : 'odpt.Calendar:Weekday';
@@ -94,12 +96,30 @@ exports.getBusSchedule = async (req, res, next) => {
           const timeData = await timeRes.json();
           if (timeData.length > 0) {
             const timetable = timeData[0]["odpt:stationTimetableObject"];
-            // const hours = String(now.getHours()).padStart(2, '0');
-            // const minutes = String(now.getMinutes()).padStart(2, '0');
-            // const currentTimeStr = `${hours}:${minutes}`;
-            const nextTrain = timetable.find(t => t["odpt:departureTime"] >= currentTimeStr);
-            if (nextTrain) {
-              trainTime = nextTrain["odpt:departureTime"];
+            const futureTrains = timetable.filter(t => t["odpt:departureTime"] >= currentTimeStr);
+            const nextTrain = futureTrains.slice(0, 4);
+
+            for (const train of nextTrain) {
+              const tTime = train["odpt:departureTime"];
+              const [tH, tM] = tTime.split(':').map(Number);
+              const totalMins = tH * 60 + tM + travelMins;
+              const aH = Math.floor(totalMins / 60) % 24;
+              const aM = totalMins % 60;
+              const aTime = `${String(aH).padStart(2, '0')}:${String(aM).padStart(2, '0')}`;
+
+              const schedule = await Dashboard.findNextBus(station.trim(), weekday, delay * 60, aTime);
+              const rawTime = schedule ? (schedule.bus_departure_time || schedule.bus_time || schedule.adjusted_arrival_time) : null;
+              let fBusTime = rawTime ? String(rawTime).slice(0, 5) : "利用できるバスがありません";
+
+              if (fBusTime !== "利用できるバスがありません" && fBusTime < aTime) {
+                fBusTime = "利用できるバスがありません";
+              }
+
+              candidatesList.push({
+                trainTime: tTime,
+                arriveTime: aTime,
+                busTime: fBusTime
+              });
             }
           }
         }
@@ -108,54 +128,36 @@ exports.getBusSchedule = async (req, res, next) => {
       }
     }
 
-    //到着時間計算//
-    let busSearchTime = currentTimeStr;
-    if (trainTime !== "--:--") {
-      const [tH, tM] = trainTime.split(':').map(Number);
-      const totalMins = tH * 60 + tM + travelMins;
-      const aH = Math.floor(totalMins / 60) % 24;
-      const aM = totalMins % 60;
-      arriveTime = `${String(aH).padStart(2, '0')}:${String(aM).padStart(2, '0')}`;
-      busSearchTime = arriveTime;
-    }
-
-    //遅刻判定（電車の時刻が8時50分以降の場合警告//
-    const schedule = await Dashboard.findNextBus(station.trim(), weekday, delay * 60, busSearchTime);
-    const rawTime = schedule ? (schedule.bus_departure_time || schedule.bus_time || schedule.adjusted_arrival_time) : null;
-    let formattedBusTime = rawTime ? String(rawTime).slice(0, 5) : "利用できるバスがありません";
-
-    if (formattedBusTime !== "利用できるバスがありません" && formattedBusTime < busSearchTime) {
-      formattedBusTime = "利用できるバスがありません";
-    }
-
+    //推奨データ設定//
+    let recommendTrain = "--:--";
+    let recommendBus = "利用できるバスがありません";
     let isLate = false;
     let alertMessage = "";
     const cutoffTime = "08:50";
 
-    if (trainTime !== "--:--" && trainTime > cutoffTime) {
-      isLate = true;
-      alertMessage = "スクールバスに間に合いません";
+    if (candidatesList.length > 0) {
+      recommendTrain = candidatesList[0].trainTime;
+      recommendBus = candidatesList[0].busTime;
+
+      if ((recommendTrain > cutoffTime) || recommendBus === "利用できるバスがありません") {
+        isLate = true;
+        alertMessage = "スクールバスに間に合いません";
+      }
     }
 
     if (currentTimeStr >= "10:00") {
-      formattedBusTime = "利用できるバスがありません";
+      recommendBus = "利用できるバスがありません";
       isLate = true;
       alertMessage = "";
     }
 
     res.json({
       success: true,
-      recommendTrain: trainTime,
-      recommendBus: formattedBusTime,
+      recommendTrain: recommendTrain,
+      recommendBus: recommendBus,
       isLate: isLate,
       alertMessage: alertMessage,
-      candidates: [
-        {
-          trainTime: trainTime,
-          arriveTime: arriveTime,
-          busTime: formattedBusTime
-        }
-      ]
+      candidates: candidatesList.length > 0 ? candidatesList : [{ trainTime: "--:--", arriveTime: "計算中", busTime: "利用できるバスがありません" }]
     });
   } catch (error) {
     next(error);

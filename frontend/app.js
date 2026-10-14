@@ -127,8 +127,8 @@ async function updateApp(stationName) {
         if (!trainRes.ok) throw new Error("遅延情報の取得に失敗しました");
         const trainData = await trainRes.json();
 
-        //DBからバス時刻取得　朝にするテストの場合末尾に?testTime=08:30を追加//
-        const busRes = await fetch(`${API_BASE_URL}/bus-schedule?station=${encodeURIComponent(stationName)}&delay=${trainData.delayMinutes || 0}&testTime=08:30`);
+        //DBからバス時刻取得　朝にするテストの場合末尾に?testTime=08:00を追加//
+        const busRes = await fetch(`${API_BASE_URL}/bus-schedule?station=${encodeURIComponent(stationName)}&delay=${trainData.delayMinutes || 0}&testTime=08:00`);
         if (!busRes.ok) throw new Error("バス時刻の取得に失敗しました");
         const busData = await busRes.json();
         // データを表示
