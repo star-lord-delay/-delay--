@@ -4,10 +4,10 @@ const Dashboard = {
   async getStation(userId) {
     const [rows] = await pool.query(
       `SELECT s.station_name
-       FROM user_stations_tbl us
-       JOIN station_tbl s ON us.station_id = s.station_id
-       WHERE us.user_id = ?
-       LIMIT 1`,
+        FROM user_stations_tbl us
+        JOIN station_tbl s ON us.station_id = s.station_id
+        WHERE us.user_id = ?
+        LIMIT 1`,
       [userId]
     );
     if (rows && rows.length > 0 && rows[0].station_name) {
@@ -44,26 +44,44 @@ const Dashboard = {
   },
 
 
-  async findNextBus(station, weekday, delaySeconds) {
+  async findNextBus(station, weekday, delaySeconds, targetTimeStr = null) {
+
+    const timeQuery = targetTimeStr 
+      ? "TIME_TO_SEC(?)" 
+      : "TIME_TO_SEC(CURTIME())";
+
+    const timeParam = targetTimeStr 
+      ? `${targetTimeStr}:00` 
+      : null;
+
+    const queryParams = targetTimeStr 
+      ? [timeParam, delaySeconds] 
+      : [delaySeconds];
+
     const [rows] = await pool.query(
       `SELECT bus_survice, bus_time AS bus_departure_time
-       FROM bus_tbl
-       WHERE TIME_TO_SEC(bus_time) >= TIME_TO_SEC(CURTIME()) + ?
-       ORDER BY bus_time ASC
-       LIMIT 1`,
-      [delaySeconds]
+      FROM bus_tbl
+      WHERE TIME_TO_SEC(bus_time) >= ${timeQuery} + ?
+      ORDER BY bus_time ASC
+      LIMIT 1`,
+      queryParams
     );
-    if (!rows[0]) {
-      const [firstBus] = await pool.query(
-        `SELECT bus_survice, bus_time AS bus_departure_time
-         FROM bus_tbl
-         ORDER BY bus_time ASC
-         LIMIT 1`
-      );
-      return firstBus[0] || null;
+
+    if (rows[0]) {
+      return rows[0];
     }
 
-    return rows[0];
+    if (targetTimeStr && targetTimeStr >= "10:00") {
+      return null;
+    }
+
+    const [firstBus] = await pool.query(
+      `SELECT bus_survice, bus_time AS bus_departure_time
+      FROM bus_tbl
+      ORDER BY bus_time ASC
+      LIMIT 1`
+    );
+    return firstBus[0] || null;
   }
 };
 

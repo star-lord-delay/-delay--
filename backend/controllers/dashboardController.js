@@ -52,24 +52,7 @@ exports.getBusSchedule = async (req, res, next) => {
     //現在時刻//
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
-    let currentTimeStr = `${hours}:${minutes}`;
-
-    //朝限定//
-    // if (currentTimeStr >= "10:00" && currentTimeStr <= "23:59") {
-    //   return res.json({
-    //     success: true,
-    //     recommendTrain: "--:--",
-    //     recommendBus: "--:--",
-    //     isLate: true,
-    //     alertMessage: "利用できるバスがありません",
-    //     candidates: []
-    //   });
-    // }
-
-    //バス時刻//)
-    const schedule = await Dashboard.findNextBus(station.trim(), weekday, delay * 60);
-    const rawTime = schedule ? (schedule.bus_departure_time || schedule.bus_time || schedule.adjusted_arrival_time) : "08:30:00";
-    let formattedBusTime = String(rawTime).slice(0, 5);
+    let currentTimeStr = req.query.testTime || `${hours}:${minutes}`;
     
     //利用駅の時刻表//
     let trainTime = "--:--";
@@ -86,6 +69,18 @@ exports.getBusSchedule = async (req, res, next) => {
       "高萩": "Takahagi", "南中郷": "Minaminakago", "磯原": "Isohara", "大津港": "Otsuko"
     };
 
+    //各駅から水戸駅までの時間//
+    const travelTimeMap = {
+      "取手": 75, "藤代": 70, "龍ヶ崎": 65, "牛久": 60,
+      "ひたち野うしく": 55, "荒川沖": 50, "土浦": 45, "神立": 40,
+      "高浜": 35, "石岡": 30, "羽鳥": 25, "友部": 15,
+      "内原": 10, "赤塚": 6, "勝田": 6, "佐和": 10,
+      "東海": 15, "大甕": 23, "常陸多賀": 28, "日立": 33,
+      "小木津": 38, "十王": 43, "高萩": 50, "南中郷": 55,
+      "磯原": 60, "大津港": 65
+    };
+
+    const travelMins = travelTimeMap[station.trim()] || 40;
     const timeEndpoint = process.env.TRAIN__JOBAN_TIME_API_URL;
     const apiKey = process.env.TRAIN__JOBAN_TIME_API_KEY;
     const romajiStation = stationMap[station.trim()];
@@ -99,9 +94,9 @@ exports.getBusSchedule = async (req, res, next) => {
           const timeData = await timeRes.json();
           if (timeData.length > 0) {
             const timetable = timeData[0]["odpt:stationTimetableObject"];
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const currentTimeStr = `${hours}:${minutes}`;
+            // const hours = String(now.getHours()).padStart(2, '0');
+            // const minutes = String(now.getMinutes()).padStart(2, '0');
+            // const currentTimeStr = `${hours}:${minutes}`;
             const nextTrain = timetable.find(t => t["odpt:departureTime"] >= currentTimeStr);
             if (nextTrain) {
               trainTime = nextTrain["odpt:departureTime"];
@@ -113,7 +108,26 @@ exports.getBusSchedule = async (req, res, next) => {
       }
     }
 
+    //到着時間計算//
+    let busSearchTime = currentTimeStr;
+    if (trainTime !== "--:--") {
+      const [tH, tM] = trainTime.split(':').map(Number);
+      const totalMins = tH * 60 + tM + travelMins;
+      const aH = Math.floor(totalMins / 60) % 24;
+      const aM = totalMins % 60;
+      arriveTime = `${String(aH).padStart(2, '0')}:${String(aM).padStart(2, '0')}`;
+      busSearchTime = arriveTime;
+    }
+
     //遅刻判定（電車の時刻が8時50分以降の場合警告//
+    const schedule = await Dashboard.findNextBus(station.trim(), weekday, delay * 60, busSearchTime);
+    const rawTime = schedule ? (schedule.bus_departure_time || schedule.bus_time || schedule.adjusted_arrival_time) : null;
+    let formattedBusTime = rawTime ? String(rawTime).slice(0, 5) : "利用できるバスがありません";
+
+    if (formattedBusTime !== "利用できるバスがありません" && formattedBusTime < busSearchTime) {
+      formattedBusTime = "利用できるバスがありません";
+    }
+
     let isLate = false;
     let alertMessage = "";
     const cutoffTime = "08:50";
@@ -147,15 +161,6 @@ exports.getBusSchedule = async (req, res, next) => {
     next(error);
   }
 };
-
-// function addMinutes(time, minutes) {
-//   const [hours, minutesPart, seconds] = String(time).split(':').map(Number);
-//   const totalSeconds = hours * 3600 + minutesPart * 60 + seconds + minutes * 60;
-//   const normalized = ((totalSeconds % 86400) + 86400) % 86400;
-//   return [Math.floor(normalized / 3600), Math.floor(normalized / 60) % 60, normalized % 60]
-//     .map((part) => String(part).padStart(2, '0'))
-//     .join(':');
-// }
 
 //常磐線遅延情報//
 exports.getTrainStatus = async (req, res, next) => {
@@ -261,14 +266,3 @@ exports.getSuigunStatus = async (req, res, next) => {
     next(error);
   }
 };
-// function extractDelayMinutes(value) {
-//   if (!value || typeof value !== 'object') return null;
-//   for (const key of ['delayMinutes', 'delay_minutes', 'delay']) {
-//     if (key in value && Number.isFinite(Number(value[key]))) return Math.max(0, Number(value[key]));
-//   }
-//   for (const child of Object.values(value)) {
-//     const result = extractDelayMinutes(child);
-//     if (result !== null) return result;
-//   }
-//   return null;
-// }

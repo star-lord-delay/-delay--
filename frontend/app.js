@@ -127,8 +127,8 @@ async function updateApp(stationName) {
         if (!trainRes.ok) throw new Error("遅延情報の取得に失敗しました");
         const trainData = await trainRes.json();
 
-        //DBからバス時刻取得//
-        const busRes = await fetch(`${API_BASE_URL}/bus-schedule?station=${encodeURIComponent(stationName)}&delay=${trainData.delayMinutes || 0}`);
+        //DBからバス時刻取得　朝にするテストの場合末尾に?testTime=08:30を追加//
+        const busRes = await fetch(`${API_BASE_URL}/bus-schedule?station=${encodeURIComponent(stationName)}&delay=${trainData.delayMinutes || 0}&testTime=08:30`);
         if (!busRes.ok) throw new Error("バス時刻の取得に失敗しました");
         const busData = await busRes.json();
         // データを表示
@@ -153,32 +153,45 @@ function renderUI(stationName, trainData, busData) {
     }
     //時刻の反映//
     const trainTimeEl = document.getElementById('recTrainTime');
+    const planBox = document.getElementById('planBox');
     if (trainTimeEl) trainTimeEl.textContent = busData.recommendTrain || "--:--";
 
     const busTimeEl = document.getElementById('recBusTime');
     if (busTimeEl) {
-        if (busData.recommendBus === "利用できるバスがありません") {
-            // エラーメッセージの場合は「発」をつけず、文字を小さくする
-            busTimeEl.textContent = busData.recommendBus;
-            busTimeEl.style.fontSize = "16px"; // スマホでもはみ出ないサイズに調整
-            busTimeEl.style.whiteSpace = "normal"; // 必要に応じて折り返す
+        const isMissed = busData.isLate || busData.recommendBus === "利用できるバスがありません";
+        if (isMissed) {
+            busTimeEl.textContent = "スクールバスに間に合いません";
+            busTimeEl.style.fontSize = "16px";
+            busTimeEl.style.color = "#dc2626";
+            busTimeEl.style.whiteSpace = "normal";
+            if (planBox) planBox.style.borderColor = "#dc2626";
         } else if (busData.recommendBus) {
-            // 通常の時刻の場合は「発」をつけて大きくする
             busTimeEl.textContent = `${busData.recommendBus}発`;
-            busTimeEl.style.fontSize = ""; // CSSの元のサイズに戻す
+            busTimeEl.style.fontSize = "32px";
+            busTimeEl.style.color = "";
+            if (planBox) planBox.style.borderColor = "#10b981";
+        
         } else {
             busTimeEl.textContent = "--:--発";
-            busTimeEl.style.fontSize = "";
+            busTimeEl.style.fontSize = "32px";
+            busTimeEl.style.color = "";
+            if (planBox) planBox.style.borderColor = "#10b981";
         }
     }
     //候補リスト//
     const candidateList = document.getElementById('candidateList');
     if (candidateList) {
         candidateList.innerHTML = busData.candidates.map(c => {
-            // ★ リスト用のバス時刻にも条件を追加（バスがない時は「発」をつけない）
-            const displayBusTime = (c.busTime && c.busTime.includes("バスがありません")) 
-                ? c.busTime 
-                : `${c.busTime}発`;
+            let displayBusTime;
+            let textColor = "#10b981";
+            const cIsMissed = busData.isLate || (c.busTime && c.busTime.includes("利用できるバスがありません"));
+
+            if (cIsMissed) {
+                displayBusTime = "スクールバスに間に合いません";
+                textColor = "#dc2626";
+            } else {
+                displayBusTime = `${c.busTime}発`;
+            }
 
             return `
             <div style="padding: 16px 0; border-bottom:1px solid #f0f4f8;">
@@ -188,7 +201,7 @@ function renderUI(stationName, trainData, busData) {
                     </div>
                     <div style="font-size: 13px; color: #666;">
                         水戸着 ${c.arriveTime} <span style="margin: 0 8px;">→</span>
-                        <span style="color: #10b981; font-weight: bold;">${displayBusTime}</span>
+                        <span style="color: ${textColor}; font-weight: bold;">${displayBusTime}</span>
                     </div>
                 </div>
             `;
