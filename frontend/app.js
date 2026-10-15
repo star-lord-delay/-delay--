@@ -1,7 +1,7 @@
 const API_BASE_URL = 'http://localhost:3000/api';
 const stationData = {
     "常磐線（取手・土浦方面）": [
-        "取手", "藤代", "龍ヶ崎", "牛久", "ひたち野うしく", "荒川沖", "土浦", "神立", "高浜", "石岡", "羽鳥", "友部", "内原", "赤塚"
+        "赤塚", "内原", "友部", "羽鳥", "石岡", "高浜", "神立", "土浦", "荒川沖", "ひたち野うしく", "牛久", "龍ヶ崎", "藤代", "取手"
     ],
     "常磐線（勝田・日立方面）": [
         "勝田", "佐和", "東海", "大甕", "常陸多賀", "日立", "小木津", "十王", "高萩", "南中郷", "磯原", "大津港"
@@ -128,7 +128,7 @@ async function updateApp(stationName) {
         const trainData = await trainRes.json();
 
         //DBからバス時刻取得　朝にするテストの場合末尾に?testTime=08:00を追加//
-        const busRes = await fetch(`${API_BASE_URL}/bus-schedule?station=${encodeURIComponent(stationName)}&delay=${trainData.delayMinutes || 0}&testTime=08:00`);
+        const busRes = await fetch(`${API_BASE_URL}/bus-schedule?station=${encodeURIComponent(stationName)}&delay=${trainData.delayMinutes || 0}&testTime=07:00`);
         if (!busRes.ok) throw new Error("バス時刻の取得に失敗しました");
         const busData = await busRes.json();
         // データを表示
