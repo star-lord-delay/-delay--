@@ -17,6 +17,7 @@ const Dashboard = {
     return { station_name: '土浦' };
   },
 
+  //利用駅がstation_tblに登録されているかを確認//
   async saveStation(userId, station) {
     const [stations] = await pool.query(
       'SELECT station_id FROM station_tbl WHERE station_name = ?',
@@ -30,19 +31,23 @@ const Dashboard = {
       stationId = (maxRes[0].maxId || 0) + 1;
 
     await pool.query(
-        'INSERT INTO station_tbl (station_id, station_name) VALUES (?, ?)',
+        'INSERT INTO station_tbl (station_id, station_name, route_id, station_order) VALUES (?, ?, 1, 99)',
         [stationId, station]
       );
     } else {
       stationId = stations[0].station_id;
     }
 
+    //ユーザーの利用駅保存//
+    await pool.query(
+      'DELETE FROM user_stations_tbl WHERE user_id = ?', [userId]
+    );
+
     await pool.query(
       'INSERT INTO user_stations_tbl (user_id, station_id) VALUES (?, ?)',
       [userId, stationId]
     );
   },
-
 
   async findNextBus(station, weekday, delaySeconds, targetTimeStr = null) {
 
