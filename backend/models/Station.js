@@ -3,11 +3,11 @@ const pool = require('../config/database');
 
 const Station = {
   async findAll() {
-    const [rows] = await pool.query('SELECT * FROM station_tbl ORDER BY route_id, station_order ASC');
+    const [rows] = await pool.query('SELECT * FROM station_tbl ORDER BY route_id, station_id ASC');
     return rows;
   },
   async findByRouteId(routeId) {
-    const [rows] = await pool.query('SELECT * FROM station_tbl WHERE route_id = ? ORDER BY station_order ASC', [routeId]);
+    const [rows] = await pool.query('SELECT * FROM station_tbl WHERE route_id = ? ORDER BY station_id ASC', [routeId]);
     return rows;
   },
   async findById(stationId) {

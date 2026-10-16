@@ -31,7 +31,7 @@ const Dashboard = {
       stationId = (maxRes[0].maxId || 0) + 1;
 
     await pool.query(
-        'INSERT INTO station_tbl (station_id, station_name, route_id, station_order) VALUES (?, ?, 1, 99)',
+        'INSERT INTO station_tbl (station_id, station_name, route_id) VALUES (?, ?, 1)',
         [stationId, station]
       );
     } else {
