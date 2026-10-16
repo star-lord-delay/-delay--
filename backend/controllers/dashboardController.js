@@ -270,6 +270,14 @@ exports.getTrainStatus = async (req, res, next) => {
         statusMessage = `常磐線は${delayMinutes}分遅れています。`;
     }
 
+    //テスト遅延//
+    // let delayMinutes = Math.floor(maxDelaySeconds / 60);
+    // delayMinutes = 45;
+    // let statusMessage = `常磐線は平常運転です。`;
+    // if (delayMinutes > 0) {
+    //     statusMessage = `常磐線は${delayMinutes}分遅れています。`;
+    // }
+
     res.json({
       success: true,
       delayMinutes: delayMinutes,

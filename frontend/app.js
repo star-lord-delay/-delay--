@@ -128,7 +128,7 @@ async function updateApp(stationName) {
         const trainData = await trainRes.json();
 
         //DBからバス時刻取得　朝にするテストの場合末尾に?testTime=08:00を追加//
-        const busRes = await fetch(`${API_BASE_URL}/bus-schedule?station=${encodeURIComponent(stationName)}&delay=${trainData.delayMinutes || 0}&testTime=07:00`);
+        const busRes = await fetch(`${API_BASE_URL}/bus-schedule?station=${encodeURIComponent(stationName)}&delay=${trainData.delayMinutes || 0}`);
         if (!busRes.ok) throw new Error("バス時刻の取得に失敗しました");
         const busData = await busRes.json();
         // データを表示
